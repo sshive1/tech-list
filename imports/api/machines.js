@@ -2,11 +2,11 @@ import { Meteor } from 'meteor/meteor';
 import { Mongo } from 'meteor/mongo';
 import { check } from 'meteor/check';
 
-export const Tasks = new Mongo.Collection('tasks');
+export const Machines = new Mongo.Collection('machines');
 
 if (Meteor.isServer) {
-  Meteor.publish('tasks', function tasksPublication(){
-    return Tasks.find({
+  Meteor.publish('machines', function machinesPublication(){
+    return Machines.find({
       $or: [
         { private: { $ne: true } },
         { owner: this.userId },
@@ -16,51 +16,51 @@ if (Meteor.isServer) {
 }
 
 Meteor.methods({
-  'tasks.insert'(text) {
+  'machines.insert'(text) {
      check(text, String);
 
      if (! Meteor.userId()) {
        throw new Meteor.Error('not-authorized');
      }
 
-     Tasks.insert({
+     Machines.insert({
        text,
        createdAt: new Date(),
        owner: Meteor.userId(),
        username: Meteor.user().username,
        });
   },
-  'tasks.remove'(taskId) {
-    check(taskId, String);
+  'machines.remove'(machineId) {
+    check(machineId, String);
 
-    const task = Tasks.findOne(taskId);
-    if (task.private && task.owner !== Meteor.userId()) {
+    const machine = Machines.findOne(machineId);
+    if (machine.private && machine.owner !== Meteor.userId()) {
       throw new Meteor.Error('not-authorized');
     }
 
-    Tasks.remove(taskId);
+    Machine.remove(machineId);
   },
-  'tasks.setChecked'(taskId, setChecked) {
-    check(taskId, String);
+  'machines.setChecked'(machineId, setChecked) {
+    check(machineId, String);
     check(setChecked, Boolean);
 
-    const task = Tasks.findOne(taskId);
-    if (task.private && task.owner !== Meteor.userId()) {
+    const machine = Machines.findOne(machineId);
+    if (machine.private && machine.owner !== Meteor.userId()) {
       throw new Meteor.Error('not-authorized');
     }
 
-    Tasks.update(taskId, { $set: { checked: setChecked } });
+    Machines.update(machineId, { $set: { checked: setChecked } });
   },
-  'tasks.setPrivate'(taskId, setToPrivate){
-    check(taskId, String);
+  'machines.setPrivate'(machineId, setToPrivate){
+    check(machineId, String);
     check(setToPrivate, Boolean);
 
-    const task = Tasks.findOne(taskId);
+    const machine = Machines.findOne(machineId);
 
-    if(task.owner !== Meteor.userId()) {
+    if(machine.owner !== Meteor.userId()) {
       throw new Meteor.Error('not-authorized');
     }
 
-    Tasks.update(taskId, { $set: { private: setToPrivate } });
+    Machines.update(machineId, { $set: { private: setToPrivate } });
   },
 });
